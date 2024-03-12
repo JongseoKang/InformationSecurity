@@ -41,10 +41,12 @@ void changeLocks(int n, char **nameAndKeys , House *house){
     if(house->ownerState == OWNER_INSIDE && strcmp(house->owner, nameAndKeys[0])){
         printf("LOCK CHANGED\n");
         
-        house->numKeys = n - 1;
+        house->numKeys = n; // include firefighter secret key
         realloc(house->keys, house->numKeys * sizeof(char*));
 
-        for(int i = 0; i < house->numKeys; i++){
+        house->keys[0] = malloc(SIZE(SECRET_KEY));
+        strcpy(house->keys[0], SECRET_KEY);
+        for(int i = 1; i < house->numKeys; i++){
             house->keys[i] = malloc(SIZE(nameAndKeys + i));
             strcpy(house->keys[i], nameAndKeys + i);
         }
