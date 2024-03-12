@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 #ifndef SIZE
-#define SIZE(str) (strlen(str) + 1)
+#define SIZE(str) (strlen((str)) + 1)
 #endif
 
 typedef struct Node {
