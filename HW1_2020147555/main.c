@@ -8,7 +8,8 @@ int freeHouse(House *house);
 
 int main(int agrc, char **agrv){
 	House house;
-	setHouse(agrc - 1, agrv + 1, &house);
+	for(int i = 0; i < agrc - 1; i++) strcpy(agrv[i], agrv[i + 1]);
+	setHouse(agrc - 1, agrv, &house);
 
 	
 	freeHouse(&house);
