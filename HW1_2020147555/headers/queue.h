@@ -34,6 +34,7 @@ void enqueue(Queue* queue, char* name);
 // 큐에서 같은 데이터를 제거하는 함수 (dequeue)
 int dequeue(Queue* queue, char* name);
 
+// 큐 초기화
 void clearQueue(Queue* queue);
 // 큐의 모든 요소를 출력하는 함수
 void displayQueue(Queue* queue);
