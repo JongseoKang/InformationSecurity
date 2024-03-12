@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include "input.h"
-#include "policy.h"
+#include "./headers/input.h"
+#include "./headers/policy.h"
 
 int setHouse(int n, int *ownerAndKeys, House *house);
 int freeHouse(House *house);
@@ -17,7 +17,7 @@ int main(int agrc, char **agrv){
 }
 
 int setHouse(int n, int *ownerAndKeys, House *house){
-	house->owner = malloc(SIZE(ownerAndKeys[0]) * sizeof(char));
+	house->owner = malloc(SIZE(ownerAndKeys[0]));
 	house->ownerState = OWNER_INSIDE;
 
 	house->numKeys = 5;
@@ -26,7 +26,7 @@ int setHouse(int n, int *ownerAndKeys, House *house){
 	house->ownerState = OWNER_OUTSIDE;
 
 	house->numAccess = 0;
-	house->accessQueue = NULL;
+	house->accessQueue = NULL;	//	has to be modified
 
 	house->insertedKey= malloc(5 * sizeof(char));
 	house->lockState = LOCKED;

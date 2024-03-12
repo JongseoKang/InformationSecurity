@@ -1,27 +1,12 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "./headers/queue.h"
-
-// 연결 리스트의 노드를 나타내는 구조체
-typedef struct Node {
-    int data;
-    struct Node* next;
-} Node;
-
-// 큐를 나타내는 구조체
-typedef struct {
-    Node* front; // 큐의 맨 앞을 가리키는 포인터
-    Node* rear;  // 큐의 맨 뒤를 가리키는 포인터
-} Queue;
+#include <stdio.h>
 
 // 새로운 노드를 생성하는 함수
-Node* createNode(int data) {
-    Node* newNode = (Node*)malloc(sizeof(Node));
-    if (newNode == NULL) {
-        printf("Memory allocation failed!\n");
-        exit(1);
-    }
-    newNode->data = data;
+Node* createNode(char* name) {
+    Node* newNode = malloc(sizeof(Node));
+
+    newNode->name = malloc(SIZE(name));
+    strcpy(newNode->name, name);
     newNode->next = NULL;
     return newNode;
 }
@@ -38,8 +23,8 @@ int isEmpty(Queue* queue) {
 }
 
 // 큐의 맨 뒤에 데이터를 삽입하는 함수 (enqueue)
-void enqueue(Queue* queue, int data) {
-    Node* newNode = createNode(data);
+void enqueue(Queue* queue, char* name) {
+    Node* newNode = createNode(name);
     if (isEmpty(queue)) {
         queue->front = newNode;
         queue->rear = newNode;
@@ -50,36 +35,40 @@ void enqueue(Queue* queue, int data) {
 }
 
 // 큐의 맨 앞에서 데이터를 제거하고 반환하는 함수 (dequeue)
-int dequeue(Queue* queue) {
-    if (isEmpty(queue)) {
-        printf("Queue is empty!\n");
-        exit(1);
-    }
-    Node* temp = queue->front;
-    int data = temp->data;
-    queue->front = queue->front->next;
-    free(temp);
-    return data;
-}
+int dequeue(Queue* queue, char* name) {
+    if (isEmpty(queue)) return 0;
 
-// 큐의 맨 앞에 있는 데이터를 반환하는 함수 (peek)
-int peek(Queue* queue) {
-    if (isEmpty(queue)) {
-        printf("Queue is empty!\n");
-        exit(1);
-    }
-    return queue->front->data;
+    Node* current = queue->front;
+    Node* prev = NULL;
+
+    // 큐를 순회하면서 주어진 값과 같은 노드를 찾음
+    while (current != NULL) {
+        if (strcmp(current->name, name) == 0) {
+            if (prev == NULL) { // 삭제할 노드가 맨 앞에 있는 경우
+                queue->front = current->next;
+                free(current->name);
+                free(current);
+                return 1;
+            } else { // 삭제할 노드가 중간이나 끝에 있는 경우
+                prev->next = current->next;
+                free(current->name);
+                free(current);
+                return 1;
+            }
+        }
+
+        prev = current;
+        current = current->next;
+    }    
+    
+    return 0;
 }
 
 // 큐의 모든 요소를 출력하는 함수
 void displayQueue(Queue* queue) {
-    if (isEmpty(queue)) {
-        printf("Queue is empty!\n");
-        return;
-    }
     Node* current = queue->front;
     while (current != NULL) {
-        printf("%d ", current->data);
+        printf("%s ", current->name);
         current = current->next;
     }
     printf("\n");
@@ -91,23 +80,27 @@ int main() {
     initializeQueue(&queue);
 
     // 큐에 데이터 삽입 (enqueue)
-    enqueue(&queue, 10);
-    enqueue(&queue, 20);
-    enqueue(&queue, 30);
+    enqueue(&queue, "1asdfasdfasdfasdfasdfadsf0");
+    enqueue(&queue, "20");
+    enqueue(&queue, "30");
 
     // 큐의 모든 요소 출력
     printf("Queue: ");
     displayQueue(&queue);
 
     // 큐에서 데이터 제거 및 출력 (dequeue)
-    printf("Dequeued item: %d\n", dequeue(&queue));
+    printf("Dequeued item: %d\n", dequeue(&queue, "10"));
 
     // 큐의 맨 앞 요소 확인 (peek)
-    printf("Front item: %d\n", peek(&queue));
 
     // 큐의 모든 요소 출력
     printf("Queue: ");
     displayQueue(&queue);
+    printf("Dequeued item: %d\n", dequeue(&queue, "20"));
 
+    printf("Queue: ");
+    displayQueue(&queue);
+
+    printf("Dequeued item: %d\n", dequeue(&queue, "30"));
     return 0;
 }

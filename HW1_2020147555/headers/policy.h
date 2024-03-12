@@ -6,7 +6,9 @@
 #include <stdlib.h>
 #include "queue.h"
 
+#ifndef SIZE
 #define SIZE(str) (strlen(str) + 1)
+#endif
 
 #define LOCKED 1
 #define UNLOCKED 0
