@@ -15,7 +15,7 @@ typedef struct Node {
 } Node;
 
 // 큐를 나타내는 구조체
-typedef struct {
+typedef struct Queue{
     Node* front; // 큐의 맨 앞을 가리키는 포인터
     Node* rear;  // 큐의 맨 뒤를 가리키는 포인터
 } Queue;
