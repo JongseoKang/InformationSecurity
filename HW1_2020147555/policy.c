@@ -1,5 +1,5 @@
-# include "policy.h"
-# include "queue.h"
+# include "./headers/policy.h"
+# include "./headers/queue.h"
 
 int insertKey(char *user, char *key, House *house){
     house->insertedKey = realloc(SIZE(key) * sizeof(char));
