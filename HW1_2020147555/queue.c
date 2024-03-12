@@ -1,5 +1,4 @@
 #include "./headers/queue.h"
-#include <stdio.h>
 
 // 새로운 노드를 생성하는 함수
 Node* createNode(char* name) {
@@ -64,6 +63,12 @@ int dequeue(Queue* queue, char* name) {
     return 0;
 }
 
+void clearQueue(Queue* queue) {
+    while (!isEmpty(queue)) {
+        dequeue(queue, queue->front->name);
+    }
+}
+
 // 큐의 모든 요소를 출력하는 함수
 void displayQueue(Queue* queue) {
     Node* current = queue->front;
@@ -72,35 +77,4 @@ void displayQueue(Queue* queue) {
         current = current->next;
     }
     printf("\n");
-}
-
-// 메인 함수
-int main() {
-    Queue queue;
-    initializeQueue(&queue);
-
-    // 큐에 데이터 삽입 (enqueue)
-    enqueue(&queue, "1asdfasdfasdfasdfasdfadsf0");
-    enqueue(&queue, "20");
-    enqueue(&queue, "30");
-
-    // 큐의 모든 요소 출력
-    printf("Queue: ");
-    displayQueue(&queue);
-
-    // 큐에서 데이터 제거 및 출력 (dequeue)
-    printf("Dequeued item: %d\n", dequeue(&queue, "10"));
-
-    // 큐의 맨 앞 요소 확인 (peek)
-
-    // 큐의 모든 요소 출력
-    printf("Queue: ");
-    displayQueue(&queue);
-    printf("Dequeued item: %d\n", dequeue(&queue, "20"));
-
-    printf("Queue: ");
-    displayQueue(&queue);
-
-    printf("Dequeued item: %d\n", dequeue(&queue, "30"));
-    return 0;
 }
