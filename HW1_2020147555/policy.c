@@ -47,8 +47,8 @@ void changeLocks(int n, char **nameAndKeys , House *house){
         house->keys[0] = malloc(SIZE(SECRET_KEY));
         strcpy(house->keys[0], SECRET_KEY);
         for(int i = 1; i < house->numKeys; i++){
-            house->keys[i] = malloc(SIZE(nameAndKeys + i));
-            strcpy(house->keys[i], nameAndKeys + i);
+            house->keys[i] = malloc(SIZE(nameAndKeys[i]));
+            strcpy(house->keys[i], nameAndKeys[i]);
         }
 
         house->lockState = LOCKED;
