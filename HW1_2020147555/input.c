@@ -4,7 +4,7 @@ char* getInput(){
     char *str;
     int ch;
     size_t len = 0, size = 4;
-    str = malloc(sizeof(char)*size);
+    str = realloc(str, sizeof(char)*size);
     if(!str)return NULL;
     while(EOF!=(ch=fgetc(stdin)) && ch != '\n'){
         str[len++]=ch;
@@ -18,7 +18,7 @@ char* getInput(){
     return realloc(str, sizeof(char)*len);
 }
 
-char** splitInput(char* input) {
+char** splitInput(char* rawInput, int* size) {
     int wordArraySize = INITIAL_WORD_ARRAY_SIZE; // 초기 배열 크기
     char** words = (char**)malloc(wordArraySize * sizeof(char*));
     if (words == NULL) {
@@ -54,11 +54,17 @@ char** splitInput(char* input) {
     return words;
 }
 
+void freeWords(char** words, int count) {
+    for (int i = 0; i < count; i++) {
+        free(words[i]);
+    }
+    free(words);
+}
+
 int main(void){
     char *m;
 
 
-    printf("%d\n", ' ' == '\0');
     printf("input string : ");
     m = getInput();
     printf("output string : %s\n", m);

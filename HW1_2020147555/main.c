@@ -8,9 +8,22 @@ int freeHouse(House *house);
 
 int main(int agrc, char **agrv){
 	House house;
+	char *input, **words;
+	int numWords;
+
 	for(int i = 0; i < agrc - 1; i++) strcpy(agrv[i], agrv[i + 1]);
 	setHouse(agrc - 1, agrv, &house);
 
+	input = getInput();
+	while(input != NULL){
+		words = splitInput(input, &numWords);
+
+
+
+
+		input = getInput();
+	}
+	
 	
 	freeHouse(&house);
 	return 0;

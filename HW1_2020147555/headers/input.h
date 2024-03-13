@@ -3,11 +3,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define STDERR -1
 
 char* getInput();
-char** splitInput(char* rawInput);
+char** splitInput(char* rawInput, int* size);
+void freeWords(char** words, int size);
 
 
 #endif
