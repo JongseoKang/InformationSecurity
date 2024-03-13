@@ -18,7 +18,7 @@ char* getInput(){
     return realloc(str, sizeof(char)*len);
 }
 
-char** splitString(char* input, int* count) {
+char** splitInput(char* input) {
     int wordArraySize = INITIAL_WORD_ARRAY_SIZE; // 초기 배열 크기
     char** words = (char**)malloc(wordArraySize * sizeof(char*));
     if (words == NULL) {
