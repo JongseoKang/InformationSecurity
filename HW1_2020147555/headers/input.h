@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef SIZE
+#define SIZE(str) (strlen((str)) + 1)
+#endif
 #define STDERR -1
 
 char* getInput();
