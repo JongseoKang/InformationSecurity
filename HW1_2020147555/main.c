@@ -1,42 +1,88 @@
 #include <stdio.h>
-
 #include "./headers/input.h"
 #include "./headers/policy.h"
 
-int setHouse(int n, int *ownerAndKeys, House *house);
+int setHouse(int n, char **ownerAndKeys, House *house);
 int freeHouse(House *house);
+
+int procedure;
 
 int main(int agrc, char **agrv){
 	House house;
 	char *input, **words;
 	int numWords;
+	char **ownerAndKeys = malloc((agrc - 1) * sizeof(char*));
 
-	for(int i = 0; i < agrc - 1; i++) strcpy(agrv[i], agrv[i + 1]);
-	setHouse(agrc - 1, agrv, &house);
+	for(int i = 0; i < agrc - 1; i++){
+		ownerAndKeys[i] = malloc(SIZE(agrv[i + 1]));
+		strcpy(ownerAndKeys[i], agrv[i + 1]);
+	}
+
+	setHouse(agrc - 1, ownerAndKeys, &house);
+	for(int i = 0; i < agrc - 1; i++) free(ownerAndKeys[i]);
+	free(ownerAndKeys);
 
 	input = getInput();
-	while(input != NULL){
-		words = splitInput(input, &numWords);
+	words = splitInput(input, &numWords);
+	while(numWords > 1 || strlen(words[0]) > 0){
+		if(keysNamesCheck(words, numWords) == INVALID){
+			printf("ERROR\n");
+		}
+		else if(insertKeyCheck(words, numWords) == VALID){
+			insertKey(words[2], words[3], &house);
+		}
+		else if(turnKeyCheck(words, numWords) == VALID){
+			turnKey(words[2], &house);
+		}
+		else if(enterHouseCheck(words, numWords)){
+			enterHouse(words[2], &house);
+		}
+		else if(insideMemebersCheck(words, numWords) == VALID){
+			insideMemebers(&house);
+		}
+		else if(changeLocksCheck(words, numWords) == VALID){
+			char **nameAndKeys = malloc((numWords - 2) * sizeof(char*));
 
+			for(int i = 0; i < numWords - 2; i++){
+				nameAndKeys[i] = malloc(SIZE(words[i + 2]));
+				strcpy(nameAndKeys[i], words[i + 2]);
+			}
 
-
+			changeLocks(numWords - 2, nameAndKeys, &house);
+			
+			for(int i = 0; i < numWords - 2; i++) free(nameAndKeys[i]);
+			free(nameAndKeys);
+		}
+		else if(leaveHouseCheck(words, numWords) == VALID){
+			leaveHouse(words[2], &house);
+		}
+		else{
+			printf("ERROR");
+		}
 
 		input = getInput();
+		words = splitInput(input, &numWords);
 	}
 	
+	free(input);
+	freeWords(words, numWords);
 	
 	freeHouse(&house);
 	return 0;
 }
 
-int setHouse(int n, int *ownerAndKeys, House *house){
+int setHouse(int n, char **ownerAndKeys, House *house){
 	house->owner = malloc(SIZE(ownerAndKeys[0]));
 	strcpy(house->owner, ownerAndKeys[0]);
 
+
 	house->ownerState = OWNER_INSIDE;
-	house->numKeys = 5;
-	house->keys = malloc(house->numKeys * sizeof(char*));
-	changeLocks(n, ownerAndKeys, house);
+	house->numKeys = 0;
+	house->keys = malloc(0);
+	//changeLocks(n, ownerAndKeys, house);
+
+	for(int i = 0; i < n; i++) printf("%s ", house->keys[i]);
+
 	house->ownerState = OWNER_OUTSIDE;
 
 	house->accessQueue = malloc(sizeof(Queue));

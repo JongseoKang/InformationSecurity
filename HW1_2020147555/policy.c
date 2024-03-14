@@ -1,7 +1,8 @@
 #include "./headers/policy.h"
 
 void insertKey(char *user, char *key, House *house){
-    realloc(house->insertedKey, SIZE(key));
+    free(house->insertedKey);
+    house->insertedKey = malloc(SIZE(key));
     strcpy(house->insertedKey, key);
     house->insertState = INSERTED;
     house->lockState = LOCKED;
@@ -37,12 +38,15 @@ void insideMemebers(House *house){
     else displayQueue(house->accessQueue);
 }
 
-void changeLocks(int n, char **nameAndKeys , House *house){
-    if(house->ownerState == OWNER_INSIDE && strcmp(house->owner, nameAndKeys[0])){
+void changeLocks(int n, char **nameAndKeys, House *house){
+    if(house->ownerState == OWNER_INSIDE && strcmp(house->owner, nameAndKeys[0]) == 0){
         printf("LOCK CHANGED\n");
-        
+
+        for(int i = 0; i < house->numKeys; i++) free(house->keys[i]);
+        free(house->keys);
+
         house->numKeys = n; // include firefighter secret key
-        realloc(house->keys, house->numKeys * sizeof(char*));
+        house->keys = malloc(n * sizeof(char*));
 
         house->keys[0] = malloc(SIZE(SECRET_KEY));
         strcpy(house->keys[0], SECRET_KEY);
