@@ -1,11 +1,11 @@
 #include "./headers/input.h"
 
-char *getInput()
+char* getInput()
 {
     char *str;
     int ch;
     size_t len = 0, size = 4;
-    str = realloc(str, sizeof(char) * size);
+    str = malloc(sizeof(char) * size);
     if (!str)
         return NULL;
     while (EOF != (ch = fgetc(stdin)) && ch != '\n')

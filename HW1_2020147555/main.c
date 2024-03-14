@@ -5,8 +5,6 @@
 int setHouse(int n, char **ownerAndKeys, House *house);
 int freeHouse(House *house);
 
-int procedure;
-
 int main(int agrc, char **agrv){
 	House house;
 	char *input, **words;
@@ -74,16 +72,16 @@ int main(int agrc, char **agrv){
 int setHouse(int n, char **ownerAndKeys, House *house){
 	house->owner = malloc(SIZE(ownerAndKeys[0]));
 	strcpy(house->owner, ownerAndKeys[0]);
-
-
-	house->ownerState = OWNER_INSIDE;
-	house->numKeys = 0;
-	house->keys = malloc(0);
-	//changeLocks(n, ownerAndKeys, house);
-
-	for(int i = 0; i < n; i++) printf("%s ", house->keys[i]);
-
 	house->ownerState = OWNER_OUTSIDE;
+
+	house->numKeys = n;
+	house->keys = malloc(n * sizeof(char*));
+
+	house->keys[0] = malloc(SIZE(SECRET_KEY));
+	for(int i = 1; i < n; i++){
+		house->keys[i] = malloc(SIZE(ownerAndKeys[i]));
+		strcpy(house->keys[i], ownerAndKeys[i]);
+	}
 
 	house->accessQueue = malloc(sizeof(Queue));
 	initializeQueue(house->accessQueue);

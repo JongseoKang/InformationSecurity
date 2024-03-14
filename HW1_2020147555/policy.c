@@ -18,6 +18,7 @@ void turnKey(char *user, House *house){
             if(strcmp(house->keys[i], house->insertedKey) == 0){
                 printf("SUCCESS %s TURNS KEY %s\n", user, house->insertedKey);
                 house->lockState = UNLOCKED;
+                return;
             }
         }
 
