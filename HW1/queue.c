@@ -73,7 +73,8 @@ void clearQueue(Queue* queue) {
 void displayQueue(Queue* queue) {
     Node* current = queue->front;
     while (current != NULL) {
-        printf("%s ", current->name);
+        printf("%s", current->name);
+        if(current->next != NULL) printf(", ");
         current = current->next;
     }
     printf("\n");

@@ -1,0 +1,17 @@
+NAME: Jongseo Kang
+ID: 2020147555
+
+DESCRIPTION
+
+Headers
+<input.h> 
+This header contains functions of getting input data and checking their validity.
+
+<queue.h>
+This header exist literally for data structure "queue" which is used for house->accessQueue.
+
+<polich.h>
+This header contains functions of security policies.
+
+Sources
+<input.c>

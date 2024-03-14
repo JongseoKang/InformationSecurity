@@ -32,7 +32,7 @@ int main(int agrc, char **agrv){
 		else if(turnKeyCheck(words, numWords) == VALID){
 			turnKey(words[2], &house);
 		}
-		else if(enterHouseCheck(words, numWords)){
+		else if(enterHouseCheck(words, numWords) == VALID){
 			enterHouse(words[2], &house);
 		}
 		else if(insideMemebersCheck(words, numWords) == VALID){
@@ -55,7 +55,7 @@ int main(int agrc, char **agrv){
 			leaveHouse(words[2], &house);
 		}
 		else{
-			printf("ERROR");
+			printf("ERROR\n");
 		}
 
 		input = getInput();
@@ -78,6 +78,7 @@ int setHouse(int n, char **ownerAndKeys, House *house){
 	house->keys = malloc(n * sizeof(char*));
 
 	house->keys[0] = malloc(SIZE(SECRET_KEY));
+	strcpy(house->keys[0], SECRET_KEY);
 	for(int i = 1; i < n; i++){
 		house->keys[i] = malloc(SIZE(ownerAndKeys[i]));
 		strcpy(house->keys[i], ownerAndKeys[i]);

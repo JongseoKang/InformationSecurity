@@ -31,6 +31,7 @@ void enterHouse(char *user, House *house){
         printf("ACCESS ALLOWED\n");
         enqueue(house->accessQueue, user);
         house->lockState = LOCKED;
+        if(strcmp(house->owner, user) == 0) house->ownerState = OWNER_INSIDE;
     }else printf("ACCESS DENIED\n");
 }
 
@@ -57,10 +58,10 @@ void changeLocks(int n, char **nameAndKeys, House *house){
         }
 
         house->lockState = LOCKED;
-    }else printf("LOCK CHANGED DENIED\n");
+    }else printf("LOCK CHANGE DENIED\n");
 }
 
 void leaveHouse(char *user, House *house){
     if(dequeue(house->accessQueue, user)) printf("%s LEFT\n", user);
-    else printf("%s NOT HERE", user);
+    else printf("%s NOT HERE\n", user);
 }
