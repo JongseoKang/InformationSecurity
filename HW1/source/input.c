@@ -1,4 +1,4 @@
-#include "./headers/input.h"
+#include "../headers/input.h"
 
 char* getInput()
 {

@@ -1,4 +1,4 @@
-#include "./headers/policy.h"
+#include "../headers/policy.h"
 
 void insertKey(char *user, char *key, House *house){
     free(house->insertedKey);

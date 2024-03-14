@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "./headers/input.h"
-#include "./headers/policy.h"
+#include "../headers/input.h"
+#include "../headers/policy.h"
 
 int setHouse(int n, char **ownerAndKeys, House *house);
 int freeHouse(House *house);

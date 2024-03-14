@@ -1,4 +1,4 @@
-#include "./headers/queue.h"
+#include "../headers/queue.h"
 
 // 새로운 노드를 생성하는 함수
 Node* createNode(char* name) {
