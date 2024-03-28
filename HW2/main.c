@@ -13,7 +13,6 @@
 
 char *getInput(FILE *fp);
 void dropRoot(uid_t uid, gid_t gid);
-void retrieveRoot(uid_t rootuid, gid_t rootgid);
 
 int main(int argc, char **argv)
 {
