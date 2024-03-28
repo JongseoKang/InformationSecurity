@@ -1,8 +1,121 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <string.h>
 
+#define TOP_SECRET 1
+#define SECRET 2
+#define CONFIDENTIAL 3
+#define UNCLASSIFIED 4
+#define NOT_IN_POLICY 0
 
-int main(int agrc, char** agrv){
+char *getInput(FILE *fp);
 
+int main(int agrc, char **agrv)
+{
+    char *op = malloc(strlen(agrv[1]) + 1);
+    char *fileName = malloc(strlen(agrv[2]) + 1);
+    char *user = NULL;
+    int userLevel, fileLevel;
 
+    if (strcmp(fileName, "top_secret.data") == NULL)
+        fileLevel = TOP_SECRET;
+    else if (strcmp(fileName, "secret.data") == NULL)
+        fileLevel = SECRET;
+    else if (strcmp(fileName, "confidential.data") == NULL)
+        fileLevel = CONFIDENTIAL;
+    else if (strcmp(fileName, "unclassified.data") == NULL)
+        fileLevel = UNCLASSIFIED;
+
+    FILE *macPolicy = fopen("mac.policy", "r");
+    char *input = getInput(macPolicy);
+    char *name = malloc(strlen(input) + 1);
+    char *level = malloc(strlen(input) + 1);
+
+    while (strlen(input) > 0) // find user's clearance level
+    {
+        strcpy(name, strtok(input, ':'));
+        if (strcmp(name, user) == NULL)
+        {
+            strcpy(level, strtok(NULL, ':'));
+            if (strcmp(level, "TOP_SECRET") == NULL)
+                userLevel = TOP_SECRET;
+            else if (strcmp(level, "SECRET") == NULL)
+                userLevel = SECRET;
+            else if (strcmp(level, "CONFIDENTIAL") == NULL)
+                userLevel = CONFIDENTIAL;
+            else if (strcmp(level, "UNCLASSIFIED") == NULL)
+                userLevel = UNCLASSIFIED;
+            else
+                userLevel = NOT_IN_POLICY;
+
+            break;
+        }
+
+        free(input);
+        input = getInput(macPolicy);
+    }
+
+    free(input);
+    free(name);
+    free(level);
+    fclose(macPolicy);
+
+    if (strcmp(op, "READ") == NULL)
+    { // READ Op
+        // make log file
+        FILE *logFile = fopen(strcat(user, ".log"), "a");
+        fprintf(logFile, "read %s\n", fileName);
+        fclose(logFile);
+
+        if (userLevel != NOT_IN_POLICY && userLevel <= fileLevel)
+        {
+            // print file data
+            FILE *file = fopen(fileName, "r");
+            char *input = getInput(file);
+
+            while (strlen(input) > 0)
+            {
+                puts(input);
+                free(input);
+                input = getInput(file);
+            }
+
+            free(input);
+            fclose(file);
+        }
+        else printf("ACCESS DENIED\n");
+    }
+    else { // WRITE Op
+
+    }
+
+    free(op);
+    free(fileName);
+    free(user);
     return 0;
+}
+
+char *getInput(FILE *fp)
+{
+    char *str;
+    int ch;
+    size_t len = 0, size = 4;
+    str = malloc(sizeof(char) * size);
+    if (!str)
+        return NULL;
+    while (EOF != (ch = fgetc(fp)) && ch != '\n')
+    {
+        str[len++] = ch;
+        if (len == size)
+        {
+            str = realloc(str, sizeof(char) * (size += 16));
+            if (!str)
+                return NULL;
+        }
+    }
+    str[len++] = '\0';
+
+    return realloc(str, sizeof(char) * len);
 }
