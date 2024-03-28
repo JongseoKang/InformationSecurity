@@ -15,7 +15,7 @@ char *getInput(FILE *fp);
 void dropRoot(uid_t uid, gid_t gid);
 void retrieveRoot(uid_t rootuid, gid_t rootgid);
 
-int main(int agrc, char **agrv)
+int main(int argc, char **argv)
 {
     register struct passwd *pw;
     register uid_t uid;
@@ -25,8 +25,9 @@ int main(int agrc, char **agrv)
     gid = getgid();
     pw = getpwuid(uid);
 
-    char *op = malloc(strlen(agrv[1]) + 1);
-    char *fileName = malloc(strlen(agrv[2]) + 1);
+    char *op = malloc(strlen(argv[1]) + 1);
+    char *fileName = malloc(strlen(argv[2]) + 1);
+    char *data = NULL;
     char user[300];
     int userLevel, fileLevel;
 
@@ -47,8 +48,10 @@ int main(int agrc, char **agrv)
     char *input = getInput(macPolicy);
     char *name = malloc(strlen(input) + 1);
     char *level = malloc(strlen(input) + 1);
-
-    while (strlen(input) > 0) // find user's clearance level
+    
+    
+    // find user's clearance level
+    while (strlen(input) > 0) 
     {
         strcpy(name, strtok(input, ':'));
         if (strcmp(name, user) == NULL)
@@ -77,9 +80,7 @@ int main(int agrc, char **agrv)
     free(level);
     fclose(macPolicy);
 
-    if (strcmp(op, "READ") == NULL)
-    { // READ Op
-
+    if (strcmp(op, "READ") == NULL) { // READ Op
         if (userLevel != NOT_IN_POLICY && userLevel <= fileLevel)
         {
             // print file data
@@ -96,7 +97,7 @@ int main(int agrc, char **agrv)
             free(input);
             fclose(file);
         }
-        else printf("ACCESS DENIED\n");
+        else puts("ACCESS DENIED");
 
         // drop root
         dropRoot(uid, gid);
@@ -107,12 +108,26 @@ int main(int agrc, char **agrv)
         fclose(logFile);
     }
     else { // WRITE Op
+        if(userLevel != NOT_IN_POLICY && userLevel >= fileLevel){
+            data = malloc(strlen(argv[3]) + 1);
 
+            FILE *file = fopen(fileName, "a");
+            fputs(data, file);
+
+            free(data);
+            fclose(file);
+        }
+        else puts("ACCESS DENIED");
+
+        dropRoot(uid, gid);
+
+        FILE *logFile = fopen(strcat(user, ".log"), "a");
+        fprintf(logFile, "write %s\n", fileName);
+        fclose(logFile);
     }
 
     free(op);
     free(fileName);
-    free(user);
     return 0;
 }
 
