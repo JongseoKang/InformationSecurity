@@ -88,16 +88,12 @@ int main(int argc, char **argv)
         {
             // print file data
             FILE *file = fopen(fileName, "r");
-            input = getInput(file);
+            char in;
 
-            while (strlen(input) > 0)
-            {
-                puts(input);
-                free(input);
-                input = getInput(file);
-            }
+            while ((in = fgetc(file)) != EOF)
+                printf("%c", in);
+            puts("");
 
-            free(input);
             fclose(file);
         }
         else puts("ACCESS DENIED");
