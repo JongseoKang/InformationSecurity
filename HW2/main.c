@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pwd.h>
 
 #define TOP_SECRET 1
 #define SECRET 2
@@ -11,14 +12,28 @@
 #define NOT_IN_POLICY 0
 
 char *getInput(FILE *fp);
+void dropRoot(uid_t uid, gid_t gid);
+void retrieveRoot(uid_t rootuid, gid_t rootgid);
 
 int main(int agrc, char **agrv)
 {
+    register struct passwd *pw;
+    register uid_t uid;
+    register gid_t gid;
+
+    uid = getuid();
+    gid = getgid();
+    pw = getpwuid(uid);
+
     char *op = malloc(strlen(agrv[1]) + 1);
     char *fileName = malloc(strlen(agrv[2]) + 1);
-    char *user = NULL;
+    char user[300];
     int userLevel, fileLevel;
 
+    // get user name
+    strcpy(user, pw->pw_name);
+
+    // get level of file
     if (strcmp(fileName, "top_secret.data") == NULL)
         fileLevel = TOP_SECRET;
     else if (strcmp(fileName, "secret.data") == NULL)
@@ -64,10 +79,6 @@ int main(int agrc, char **agrv)
 
     if (strcmp(op, "READ") == NULL)
     { // READ Op
-        // make log file
-        FILE *logFile = fopen(strcat(user, ".log"), "a");
-        fprintf(logFile, "read %s\n", fileName);
-        fclose(logFile);
 
         if (userLevel != NOT_IN_POLICY && userLevel <= fileLevel)
         {
@@ -86,6 +97,14 @@ int main(int agrc, char **agrv)
             fclose(file);
         }
         else printf("ACCESS DENIED\n");
+
+        // drop root
+        dropRoot(uid, gid);
+
+        // make log file
+        FILE *logFile = fopen(strcat(user, ".log"), "a");
+        fprintf(logFile, "read %s\n", fileName);
+        fclose(logFile);
     }
     else { // WRITE Op
 
@@ -118,4 +137,9 @@ char *getInput(FILE *fp)
     str[len++] = '\0';
 
     return realloc(str, sizeof(char) * len);
+}
+
+void dropRoot(uid_t uid, gid_t gid){
+    seteuid(uid);
+    setegid(gid);
 }
