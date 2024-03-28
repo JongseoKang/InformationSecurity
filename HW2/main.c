@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include<sys/stat.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pwd.h>
+#include<sys/stat.h>
 
 #define TOP_SECRET 1
 #define SECRET 2
@@ -28,12 +30,15 @@ int main(int argc, char **argv)
     char *fileName = malloc(strlen(argv[2]) + 1);
     char *data = NULL;
     char user[300];
-    int userLevel, fileLevel;
+    int userLevel = NOT_IN_POLICY, fileLevel;
+
 
     // get user name
     strcpy(user, pw->pw_name);
 
     // get level of file
+    strcpy(op, argv[1]);
+    strcpy(fileName, argv[2]);
     if (strcmp(fileName, "top_secret.data") == NULL)
         fileLevel = TOP_SECRET;
     else if (strcmp(fileName, "secret.data") == NULL)
@@ -64,8 +69,6 @@ int main(int argc, char **argv)
                 userLevel = CONFIDENTIAL;
             else if (strcmp(level, "UNCLASSIFIED") == NULL)
                 userLevel = UNCLASSIFIED;
-            else
-                userLevel = NOT_IN_POLICY;
 
             break;
         }
@@ -79,12 +82,13 @@ int main(int argc, char **argv)
     free(level);
     fclose(macPolicy);
 
-    if (strcmp(op, "READ") == NULL) { // READ Op
+    // handling operations
+    if (strcmp(op, "read") == NULL) { // READ Op
         if (userLevel != NOT_IN_POLICY && userLevel <= fileLevel)
         {
             // print file data
             FILE *file = fopen(fileName, "r");
-            char *input = getInput(file);
+            input = getInput(file);
 
             while (strlen(input) > 0)
             {
@@ -102,6 +106,7 @@ int main(int argc, char **argv)
         dropRoot(uid, gid);
 
         // make log file
+        umask(S_IXUSR | S_IWGRP | S_IXGRP | S_IRWXO);
         FILE *logFile = fopen(strcat(user, ".log"), "a");
         fprintf(logFile, "read %s\n", fileName);
         fclose(logFile);
@@ -109,9 +114,11 @@ int main(int argc, char **argv)
     else { // WRITE Op
         if(userLevel != NOT_IN_POLICY && userLevel >= fileLevel){
             data = malloc(strlen(argv[3]) + 1);
+            strcpy(data,argv[3]);
 
             FILE *file = fopen(fileName, "a");
             fputs(data, file);
+            fputs("\n", file);
 
             free(data);
             fclose(file);
@@ -120,6 +127,7 @@ int main(int argc, char **argv)
 
         dropRoot(uid, gid);
 
+        umask(S_IXUSR | S_IWGRP | S_IXGRP | S_IRWXO);
         FILE *logFile = fopen(strcat(user, ".log"), "a");
         fprintf(logFile, "write %s\n", fileName);
         fclose(logFile);
