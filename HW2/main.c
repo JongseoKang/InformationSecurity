@@ -52,10 +52,10 @@ int main(int argc, char **argv)
     // find user's clearance level
     while (strlen(input) > 0) 
     {
-        strcpy(name, strtok(input, ':'));
+        strcpy(name, strtok(input, ":"));
         if (strcmp(name, user) == NULL)
         {
-            strcpy(level, strtok(NULL, ':'));
+            strcpy(level, strtok(NULL, ":"));
             if (strcmp(level, "TOP_SECRET") == NULL)
                 userLevel = TOP_SECRET;
             else if (strcmp(level, "SECRET") == NULL)
