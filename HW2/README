@@ -1,0 +1,7 @@
+Name: Jongseo Kang
+ID: 2020147555
+
+getpwuid 를 통해 현재 사용자를 파악한 후 fopen을 통해 mac.policy 에서 현재 사용자의 레벨을 검색한다.
+read 혹은 write operation 에 따라 명령을 수행하는데 이때 만약 파일의 접근할 수 있다면 policy에 맞는
+작업을 수행한다. 작업이 끝난 후에는 effective uid와 gid를 현재 사용자로 변경함으로써 root previlage를
+drop 한다. 이후 생성되는 로그파일은 umask를 통해 불필요한 권한을 제거한 후 생성되게 된다.
