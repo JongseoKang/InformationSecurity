@@ -12,37 +12,49 @@
 int mode;
 char *key, *in, *out, *tag;
 
-int inputCheck(int agrc, char **agrv);
+int inputCheck(int argc, char **argv);
 void sha256HashFile(const char *filename, unsigned char *hash);
+int removePadding(unsigned char *buffer, int length);
 void decryptFile(const char *inputFilename, const char *outputFilename, const unsigned char *key);
+void addPadding(unsigned char *inputBuffer, size_t bytesRead, size_t blockSize);
 void encryptFile(const char *inputFilename, const char *outputFilename, const unsigned char *key);
 
 int main(int argc, char **argv)
 {
-    if (inputCheck(agrc, agrv))
+    if (inputCheck(argc, argv))
     {
         printf("ERROR\n");
 
         free(key);
+        free(in);
+        free(out);
         free(tag);
         return 2;
     }
 
-    if(mode == ENC){
+    char hashedKey[SHA256_DIGEST_LENGTH];
 
+    if(mode == ENC){
+        sha256HashFile(key, hashedKey);
+        encryptFile(in, out, hashedKey);
     }
     else if(mode == DEC){
-
+        sha256HashFile(key, hashedKey);
+        decryptFile(in, out, hashedKey);
     }
 
 
 
+    free(key);
+    free(in);
+    free(out);
+    free(tag);
     return 0;
 }
 
-int inputCheck(int agrc, char **agrv)
+int inputCheck(int argc, char **argv)
 {
-    if (agrc & 1)
+    if (argc & 1)
         return 1;
 
     // for safe realloc()
@@ -56,7 +68,7 @@ int inputCheck(int agrc, char **agrv)
     tag = malloc(strlen("encrypted.tag"));
     strcpy(tag, "encrypted.tag");
 
-    if (strcmp(agrv[1], "enc") == 0)
+    if (strcmp(argv[1], "enc") == 0)
     { // encode mode
         mode = ENC;
         in = malloc(strlen("original.txt"));
@@ -64,7 +76,7 @@ int inputCheck(int agrc, char **agrv)
         out = malloc(strlen("encrypted.txt"));
         strcpy(out, "encrypted.txt");
     }
-    else if (strcmp(agrv[1], "dec") == 0)
+    else if (strcmp(argv[1], "dec") == 0)
     { // decode mode
         mode = DEC;
         in = malloc(strlen("encrypted.txt"));
@@ -76,42 +88,42 @@ int inputCheck(int agrc, char **agrv)
         return 1;
 
 
-    for (int i = 2; i < agrc; i += 2)
+    for (int i = 2; i < argc; i += 2)
     {
-        if (!keyCheck && strcmp(agrv[i], "key") == 0)
+        if (!keyCheck && strcmp(argv[i], "-key") == 0)
         {
             keyCheck++;
             buffer = key;
-            if (NULL == (key = realloc(key, strlen(agrv[i + 1]))))
+            if (NULL == (key = realloc(key, strlen(argv[i + 1]))))
                 free(buffer);
-            strcpy(key, agrv[i + 1]);
+            strcpy(key, argv[i + 1]);
         }
-        else if (!inCheck && strcmp(agrv[i], "in") == 0)
+        else if (!inCheck && strcmp(argv[i], "-in") == 0)
         {
             inCheck++;
             buffer = in;
-            if (NULL == (in = realloc(in, strlen(agrv[i + 1]))))
+            if (NULL == (in = realloc(in, strlen(argv[i + 1]))))
                 free(buffer);
 
-            strcpy(in, agrv[i + 1]);
+            strcpy(in, argv[i + 1]);
         }
-        else if (!outCheck && strcmp(agrv[i], "out") == 0)
+        else if (!outCheck && strcmp(argv[i], "-out") == 0)
         {
             outCheck++;
             buffer = out;
-            if (NULL == (out = realloc(out, strlen(agrv[i + 1]))))
+            if (NULL == (out = realloc(out, strlen(argv[i + 1]))))
                 free(buffer);
 
-            strcpy(out, agrv[i + 1]);
+            strcpy(out, argv[i + 1]);
         }
-        else if (!tagCheck && strcmp(agrv[i], "tag") == 0)
+        else if (!tagCheck && strcmp(argv[i], "-tag") == 0)
         {
             tagCheck++;
             buffer = tag;
-            if (NULL == (tag = realloc(tag, strlen(agrv[i + 1]))))
+            if (NULL == (tag = realloc(tag, strlen(argv[i + 1]))))
                 free(buffer);
 
-            strcpy(tag, agrv[i + 1]);
+            strcpy(tag, argv[i + 1]);
         }
         else
             return 1;
@@ -145,21 +157,24 @@ void sha256HashFile(const char *filename, unsigned char *hash)
     fclose(file);
 }
 
-void decryptFile(const char *inputFilename, const char *outputFilename, const unsigned char *key)
-{
+
+int removePadding(unsigned char *buffer, int length) {
+    unsigned char paddingValue = buffer[length - 1];
+    return length - paddingValue;
+}
+
+void decryptFile(const char *inputFilename, const char *outputFilename, const unsigned char *key) {
     FILE *inputFile = fopen(inputFilename, "rb");
     FILE *outputFile = fopen(outputFilename, "wb");
 
-    if (!inputFile || !outputFile)
-    {
+    if (!inputFile || !outputFile) {
         perror("Error opening files");
         return;
     }
 
     // Initialize AES decryption context
     AES_KEY aesKey;
-    if (AES_set_decrypt_key(key, 256, &aesKey) != 0)
-    {
+    if (AES_set_decrypt_key(key, 256, &aesKey) != 0) {
         perror("AES_set_decrypt_key failed");
         fclose(inputFile);
         fclose(outputFile);
@@ -167,13 +182,24 @@ void decryptFile(const char *inputFilename, const char *outputFilename, const un
     }
 
     unsigned char inputBuffer[AES_BLOCK_SIZE];
+    unsigned char nextBuffer[AES_BLOCK_SIZE];
     unsigned char outputBuffer[AES_BLOCK_SIZE];
-    size_t bytesRead;
+    size_t bytesRead, nextBytes;
 
-    while ((bytesRead = fread(inputBuffer, 1, AES_BLOCK_SIZE, inputFile)) > 0)
-    {
+
+    bytesRead = fread(inputBuffer, 1, AES_BLOCK_SIZE, inputFile);
+    while (bytesRead > 0) {
         // Decrypt each block
+        nextBytes = fread(nextBuffer, 1, AES_BLOCK_SIZE, inputFile);
         AES_decrypt(inputBuffer, outputBuffer, &aesKey);
+        if(nextBytes == 0) break;
+        fwrite(outputBuffer, 1, AES_BLOCK_SIZE, outputFile);
+        strcpy(inputBuffer, nextBuffer);
+        bytesRead = nextBytes;
+    }
+
+    bytesRead = removePadding(outputBuffer, AES_BLOCK_SIZE);
+    if(bytesRead){
         fwrite(outputBuffer, 1, bytesRead, outputFile);
     }
 
@@ -181,37 +207,51 @@ void decryptFile(const char *inputFilename, const char *outputFilename, const un
     fclose(outputFile);
 }
 
-void encryptFile(const char *inputFilename, const char *outputFilename, const unsigned char *key)
-{
+void addPadding(unsigned char *inputBuffer, size_t bytesRead, size_t blockSize) {
+    size_t paddingLength = blockSize - (bytesRead % blockSize);
+    for (size_t i = 0; i < paddingLength; i++) {
+        inputBuffer[blockSize - i - 1] = (unsigned char)paddingLength;
+    }
+}
+
+void encryptFile(const char *inputFilename, const char *outputFilename, const unsigned char *key) {
     FILE *inputFile = fopen(inputFilename, "rb");
     FILE *outputFile = fopen(outputFilename, "wb");
 
-    if (!inputFile || !outputFile)
-    {
+    if (!inputFile || !outputFile) {
         perror("Error opening files");
         return;
     }
 
     // Initialize AES encryption context
     AES_KEY aesKey;
-    if (AES_set_encrypt_key(key, 256, &aesKey) != 0)
-    {
+    if (AES_set_encrypt_key(key, 256, &aesKey) != 0) {
         perror("AES_set_encrypt_key failed");
         fclose(inputFile);
         fclose(outputFile);
         return;
     }
 
-    unsigned char inputBuffer[AES_BLOCK_SIZE];
+    unsigned char inputBuffer[AES_BLOCK_SIZE]; // Twice the block size for padding
+    unsigned char nextBuffer[AES_BLOCK_SIZE]; // Twice the block size for padding
     unsigned char outputBuffer[AES_BLOCK_SIZE];
-    size_t bytesRead;
+    size_t bytesRead, nextBytes;
 
-    while ((bytesRead = fread(inputBuffer, 1, AES_BLOCK_SIZE, inputFile)) > 0)
-    {
+    bytesRead = fread(inputBuffer, 1, AES_BLOCK_SIZE, inputFile);
+    while (bytesRead > 0) {
         // Encrypt each block
+        nextBytes = fread(nextBuffer, 1, AES_BLOCK_SIZE, inputFile);
+        if(nextBytes == 0) break;
         AES_encrypt(inputBuffer, outputBuffer, &aesKey);
-        fwrite(outputBuffer, 1, bytesRead, outputFile);
+        fwrite(outputBuffer, 1, AES_BLOCK_SIZE, outputFile);
+        strcpy(inputBuffer, nextBuffer);
+        bytesRead = nextBytes;
     }
+
+    // Add PKCS#7 padding
+    addPadding(inputBuffer, bytesRead, AES_BLOCK_SIZE);
+    AES_encrypt(inputBuffer, outputBuffer, &aesKey);
+    fwrite(outputBuffer, 1, AES_BLOCK_SIZE, outputFile);
 
     fclose(inputFile);
     fclose(outputFile);
