@@ -33,10 +33,10 @@ int main(int argc, char **argv)
     {
         puts("ERROR");
 
-        free(key);
-        free(in);
-        free(out);
-        free(tag);
+        if (key != NULL) free(key);
+        if (key != NULL) free(in);
+        if (key != NULL) free(out);
+        if (key != NULL) free(tag);
         return 2;
     }
 
