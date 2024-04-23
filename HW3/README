@@ -1,0 +1,6 @@
+Name: Jongseo Kang
+ID: 2020147555
+
+Encryption/Decryption: AES-256 방식을 사용했으며 이를 위해 입력된 key 값을 SHA256으로 해싱하여 사용했다. 또한 AES-256의 패딩방식으로는 PKCS-7을 사용했다.
+HMAC-SHA256: Encryption 된 cipher의 메시지를 통해 MAC를 생성하였다. 방식은 openssl에서 구현된 HMAC-SHA256을 사용했다.
+tag file: 바이너리 형식으로 입출력을 받는 방식을 채택하였다.
