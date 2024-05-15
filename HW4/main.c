@@ -12,6 +12,6 @@ int main(int argc, char **argv) {
     void (*image_classifier)(char*, int) = (void (*)(char*, int))dlsym(handle, "image_classifier");
     image_classifier(input_filename, top_k);
 
-    if(dlclose(handle)){puts("close err"); return 0; }
+    dlclose(handle);
     return 0;
 }
