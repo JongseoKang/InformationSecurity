@@ -1,2 +1,2 @@
-chris:dog.jpg:1
-kyle:eagle.jpg:99
+chris:dog.jpg:2
+kyle:eagle.jpg:3

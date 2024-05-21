@@ -1,2 +1,7 @@
-[chris:dog.jpg:1]
-[kyle:eagle.jpg:99]
+[chris:dog.jpg:2]
+12.50%: miniature schnauzer
+12.40%: malamute
+[kyle:eagle.jpg:3]
+87.09%: bald eagle
+11.46%: kite
+ 0.53%: hen

@@ -1,1 +1,0 @@
-./data/kyle 2343 eagle.jpg
