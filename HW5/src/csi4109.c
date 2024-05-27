@@ -1,9 +1,4 @@
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "csi4109.h"
+#include "../header/csi4109.h"
 
 int add_section(char *infilepath, unsigned char *buf, size_t buf_len) {
     int ret = 0;
