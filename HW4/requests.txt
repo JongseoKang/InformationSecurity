@@ -1,2 +1,7 @@
+<<<<<<< HEAD
 chris:dog.jpg:2
 kyle:eagle.jpg:3
+=======
+chris:dog.jpg:1
+kyle:eagle.jpg:99
+>>>>>>> 2fb730e605e8e7b88d4305f81c47cb24e21fe9e8

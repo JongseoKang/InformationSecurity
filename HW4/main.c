@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include <sys/wait.h>
+<<<<<<< HEAD
 #include <sys/types.h>
 #include <sys/prctl.h>
 
@@ -39,6 +40,38 @@ int main()
     void *handle = dlopen("./libdarknet_predict.so", RTLD_LAZY);
     image_classifier = (void (*)(const char *, int))dlsym(handle, "image_classifier");
 
+=======
+#include <sys/mount.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sched.h>
+#include <stdio.h>
+#include <string.h>
+#include <dlfcn.h>
+#include <stdlib.h>
+
+#define STACK_SIZE (1024 * 1024)
+
+
+char *filePath, *mntPath, *topKstring;
+unsigned int topK;
+void (*image_classifier)(const char *, int);
+
+
+char childStack[STACK_SIZE];
+int child(void *arg);
+
+int main()
+{
+    FILE *request = fopen("requests.txt", "r");
+
+    void *handle = dlopen("libdarknet_predict.so", RTLD_LAZY);
+    printf("%s\n", dlerror());
+    image_classifier = (void (*)(const char *, int))dlsym(handle, "image_classifier");
+
+    printf("%s\n", dlerror());
+>>>>>>> 2fb730e605e8e7b88d4305f81c47cb24e21fe9e8
     char *dataLine = malloc(0);
     int buffer;
     unsigned int len = 0;
@@ -51,15 +84,24 @@ int main()
 
             filePath = malloc(sizeof(char) * len);
             topKstring = malloc(sizeof(char) * len);
+<<<<<<< HEAD
             int i, cnt;
 
             memcpy(filePath, "./data/", 7);
             for (i = cnt = 0; i < len; i++)
+=======
+            mntPath = malloc(sizeof(char) * (len + 7));
+            int i, j, cnt;
+
+            memcpy(mntPath, "./data/", 7);
+            for (i = j = cnt = 0; i < len; i++)
+>>>>>>> 2fb730e605e8e7b88d4305f81c47cb24e21fe9e8
             {
                 if (dataLine[i] == ':')
                 {
                     cnt++;
                     if (cnt == 1)
+<<<<<<< HEAD
                         filePath[i + 7] = '/';
                     if (cnt == 2)
                     {
@@ -69,6 +111,19 @@ int main()
                 }
                 else
                     filePath[i + 7]= dataLine[i];
+=======
+                        mntPath[i + 7] = '\0';
+                    if (cnt == 2)
+                    {
+                        filePath[j] = '\0';
+                        break;
+                    }
+                }
+                else if(cnt < 1)
+                    mntPath[i + 7] = dataLine[i];
+                else if(cnt < 2)
+                    filePath[j++] = dataLine[i];
+>>>>>>> 2fb730e605e8e7b88d4305f81c47cb24e21fe9e8
             }
 
             for (cnt = 0, i++; i < len; i++, cnt++)
@@ -76,6 +131,7 @@ int main()
 
             topK = atoi(topKstring);
 
+<<<<<<< HEAD
             int childPID = clone(child, (void*)(childStack + STACK_SIZE), CLONE_NEWUSER | CLONE_NEWNS | CLONE_NEWNET | SIGCHLD, NULL);
 
             waitpid(childPID, NULL, 0);
@@ -84,6 +140,17 @@ int main()
             readTemp(dataLine);
 
             free(filePath); 
+=======
+            // int childPID = clone(child, (void*)(childStack + STACK_SIZE), CLONE_NEWNS | CLONE_NEWNET | SIGCHLD, NULL);
+
+            // waitpid(childPID, NULL, 0);
+
+            image_classifier(filePath,  topK);
+
+
+            free(filePath); 
+            free(mntPath);
+>>>>>>> 2fb730e605e8e7b88d4305f81c47cb24e21fe9e8
             free(topKstring);
 
             len = 0;
@@ -92,6 +159,7 @@ int main()
             dataLine[len - 1] = buffer;
     }
 
+<<<<<<< HEAD
 
     free(dataLine);
     fclose(request);
@@ -154,5 +222,28 @@ int child(void *arg){
     image_classifier(filePath, topK);
 
     fclose(tmp);
+=======
+    free(dataLine);
+    puts("1");
+
+    printf("%s\n", dlerror());
+    dlclose(handle);
+
+
+    puts("2");
+    fclose(request);
+    puts("3");
+    return 0;
+}
+
+int child(void *arg){
+    // mount(mntPath, "/", "", MS_BIND, 0);
+    // FILE *tmp = freopen("temp.txt", "w", stdout);
+
+    printf("%s %s %d\n", mntPath, filePath, topK);
+    // image_classifier(filePath, topK);
+
+    // fclose(tmp);
+>>>>>>> 2fb730e605e8e7b88d4305f81c47cb24e21fe9e8
     return 0;
 }
