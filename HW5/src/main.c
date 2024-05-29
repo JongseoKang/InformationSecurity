@@ -3,6 +3,7 @@
 
 #include "../header/rsa_sign.h"
 #include "../header/csi4109.h"
+#include "../header/elf_parser.h"
 
 int argParser(int argc, char **argv);
 
@@ -14,63 +15,70 @@ int main(int argc, char **argv){
 
     if (option == 0){       // sign
         RSA *privateKey = loadPrivateKey(privateKeyPath);
-        unsigned char *message = (unsigned char*)"Hello, RSA!";
-        size_t messageLen = strlen((char*)message);
+        unsigned char *execMsg, *signMsg;
+        size_t execSize, signSize;
 
-        unsigned char *signature = NULL;
-        size_t signatureLen = 0;
-        
-        signMessage(privateKey, message, messageLen, &signature, &signatureLen);
+        execMsg = parseExecScn(execPath, &execSize);
+        signMessage(privateKey, execMsg, execSize, &signMsg, &signSize);
 
-        add_section(execPath, signature, signatureLen);
+        add_section(execPath, signMsg, signSize);
+
+        free(execMsg);
+        free(signMsg);
+        free(execPath);
+        free(privateKeyPath);
+        RSA_free(privateKey);
     }
     else{                   // verify
         RSA *publicKey = loadPublicKey(publicKeyPath);
+        unsigned char *execMsg, *signMsg;
+        size_t execSize, signSize;
+
+        execMsg = parseExecScn(execPath, &execSize);
+        signMsg = parseSignScn(execPath, &signSize);
+
+        if(signSize == 0){
+            puts("NOT_SIGNED");
+        }
+        else if(verifySignature(publicKey, execMsg, execSize, signMsg, signSize)){
+            puts("OK");
+        }
+        else{
+            puts("NOT_OK");
+        }
+
+        free(signMsg);
+        free(execMsg);
+        free(execPath);
+        free(publicKeyPath);
+        RSA_free(publicKey);
     }
     
-
-
-
-
-    if (verifySignature(publicKey, message, messageLen, signature, signatureLen)) {
-        printf("\nSignature is valid.\n");
-    } else {
-        printf("\nSignature is invalid.\n");
-    }
-
-
-    free(privateKeyPath);
-    free(publicKeyPath);
-    free(execPath);
-
-    free(signature);
-    RSA_free(privateKey);
-    RSA_free(publicKey);
     return 0;
 }
 
 int argParser(int argc, char **argv){
-    privateKeyPath = malloc(0);
-    publicKeyPath = malloc(0);
-    execPath = malloc(0);
-
     if(strcmp(argv[1], "sign") == 0){
         option = 0;
 
-        privateKeyPath = realloc(privateKeyPath, strlen(argv[5]) + 1);
+        privateKeyPath = malloc(strlen(argv[5]) + 1);
         strcpy(privateKeyPath, argv[5]);
 
-        execPath = realloc(execPath, strlen(argv[3]) + 1);
+        execPath = malloc(strlen(argv[3]) + 1);
         strcpy(execPath, argv[3]);
+
+        return 0;
     }
     else if(strcmp(argv[1], "verify") == 0){
         option = 1;
 
-        publicKeyPath= realloc(publicKeyPath, strlen(argv[5]) + 1);
+        publicKeyPath= malloc(strlen(argv[5]) + 1);
         strcpy(publicKeyPath, argv[5]);
 
-        execPath = realloc(execPath, strlen(argv[3]) + 1);
+        execPath = malloc(strlen(argv[3]) + 1);
         strcpy(execPath, argv[3]);
+
+        return 0;
     }
 
     return 1;

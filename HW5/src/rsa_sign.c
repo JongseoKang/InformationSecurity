@@ -57,7 +57,7 @@ void signMessage(RSA *rsa, unsigned char *msg, size_t msgLen, unsigned char **si
     SHA256(msg, msgLen, hash);
 
     *sig = (unsigned char*) malloc(RSA_size(rsa));
-    !RSA_sign(NID_sha256, hash, SHA256_DIGEST_LENGTH, *sig, (unsigned int*)sigLen, rsa);
+    RSA_sign(NID_sha256, hash, SHA256_DIGEST_LENGTH, *sig, (unsigned int*)sigLen, rsa);
 }
 
 int verifySignature(RSA *rsa, unsigned char *msg, size_t msgLen, unsigned char *sig, size_t sigLen) {

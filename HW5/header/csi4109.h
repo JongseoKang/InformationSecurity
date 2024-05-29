@@ -6,6 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-int add_section(char *, unsigned char *, size_t);
+int add_section(char *infilepath, unsigned char *buf, size_t buf_len);
 
 #endif
