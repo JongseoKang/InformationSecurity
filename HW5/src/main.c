@@ -11,12 +11,12 @@ int option;
 char *privateKeyPath, *publicKeyPath, *execPath;
 
 int main(int argc, char **argv){
-    argParser(argc, argv);
+    if(argParser(argc, argv)) return 0;
 
     if (option == 0){       // sign
         RSA *privateKey = loadPrivateKey(privateKeyPath);
         unsigned char *execMsg, *signMsg;
-        size_t execSize, signSize;
+        size_t execSize = 0, signSize = 0;
 
         execMsg = parseExecScn(execPath, &execSize);
         signMessage(privateKey, execMsg, execSize, &signMsg, &signSize);
@@ -32,7 +32,7 @@ int main(int argc, char **argv){
     else{                   // verify
         RSA *publicKey = loadPublicKey(publicKeyPath);
         unsigned char *execMsg, *signMsg;
-        size_t execSize, signSize;
+        size_t execSize = 0, signSize = 0;
 
         execMsg = parseExecScn(execPath, &execSize);
         signMsg = parseSignScn(execPath, &signSize);
@@ -40,7 +40,7 @@ int main(int argc, char **argv){
         if(signSize == 0){
             puts("NOT_SIGNED");
         }
-        else if(verifySignature(publicKey, execMsg, execSize, signMsg, signSize)){
+        else if(signSize == 256 && verifySignature(publicKey, execMsg, execSize, signMsg, signSize)){
             puts("OK");
         }
         else{
