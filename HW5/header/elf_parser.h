@@ -11,6 +11,6 @@
 #include <unistd.h>
 
 unsigned char *parseExecScn(const char *filename, size_t *msgSize);
-unsigned char *parseSignScn(const char *filename, size_t *msgSize);
+unsigned char *parseSignScn(const char *filename, size_t *msgSize, int *retFlag);
 
 #endif

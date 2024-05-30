@@ -33,11 +33,12 @@ int main(int argc, char **argv){
         RSA *publicKey = loadPublicKey(publicKeyPath);
         unsigned char *execMsg, *signMsg;
         size_t execSize = 0, signSize = 0;
+        int retFlag = 0;
 
         execMsg = parseExecScn(execPath, &execSize);
-        signMsg = parseSignScn(execPath, &signSize);
+        signMsg = parseSignScn(execPath, &signSize, &retFlag);
 
-        if(signSize == -1){
+        if(!retFlag){
             puts("NOT_SIGNED");
         }
         else if(signSize == 256 && verifySignature(publicKey, execMsg, execSize, signMsg, signSize)){

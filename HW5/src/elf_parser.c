@@ -87,7 +87,7 @@ unsigned char *parseExecScn(const char *filename, size_t *msgSize) {
     return retMsg;
 }
 
-unsigned char *parseSignScn(const char *filename, size_t *msgSize){
+unsigned char *parseSignScn(const char *filename, size_t *msgSize, int *retFlag){
     if (elf_version(EV_CURRENT) == EV_NONE) {
         fprintf(stderr, "ELF library initialization failed: %s\n", elf_errmsg(-1));
         exit(EXIT_FAILURE);
@@ -125,7 +125,6 @@ unsigned char *parseSignScn(const char *filename, size_t *msgSize){
     GElf_Shdr shdr;
     char *name;
 
-    size_t retFlag = 0;
     unsigned char *retMsg = malloc(0);
     *msgSize = 0;
 
@@ -140,7 +139,7 @@ unsigned char *parseSignScn(const char *filename, size_t *msgSize){
         name = elf_strptr(e, shstrndx, shdr.sh_name);
         if (strcmp(name, ".signature") == 0){
             // Read section data
-            retFlag = 1;
+            *retFlag = 1;
 
             Elf_Data *data = elf_getdata(scn, NULL);
             if (!data) {
@@ -160,8 +159,6 @@ unsigned char *parseSignScn(const char *filename, size_t *msgSize){
 
     elf_end(e);
     close(fd);
-
-    if(!retFlag) *msgSize = -1;
 
     return retMsg;
 }
