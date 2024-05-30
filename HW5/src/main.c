@@ -37,7 +37,7 @@ int main(int argc, char **argv){
         execMsg = parseExecScn(execPath, &execSize);
         signMsg = parseSignScn(execPath, &signSize);
 
-        if(signSize == 0){
+        if(signSize == -1){
             puts("NOT_SIGNED");
         }
         else if(signSize == 256 && verifySignature(publicKey, execMsg, execSize, signMsg, signSize)){

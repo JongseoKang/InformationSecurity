@@ -125,6 +125,7 @@ unsigned char *parseSignScn(const char *filename, size_t *msgSize){
     GElf_Shdr shdr;
     char *name;
 
+    size_t retFlag = 0;
     unsigned char *retMsg = malloc(0);
     *msgSize = 0;
 
@@ -139,6 +140,8 @@ unsigned char *parseSignScn(const char *filename, size_t *msgSize){
         name = elf_strptr(e, shstrndx, shdr.sh_name);
         if (strcmp(name, ".signature") == 0){
             // Read section data
+            retFlag = 1;
+
             Elf_Data *data = elf_getdata(scn, NULL);
             if (!data) {
                 fprintf(stderr, "elf_getdata() failed: %s\n", elf_errmsg(-1));
@@ -157,6 +160,8 @@ unsigned char *parseSignScn(const char *filename, size_t *msgSize){
 
     elf_end(e);
     close(fd);
+
+    if(!retFlag) *msgSize = -1;
 
     return retMsg;
 }
